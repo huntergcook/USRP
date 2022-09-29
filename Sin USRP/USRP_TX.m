@@ -1,0 +1,33 @@
+try release(tx); end
+clc; clear;
+
+Fc = 915e6; %Center Frequnecy
+Gain = 0; %Transmit Gain    
+SamplesPerFrame = 1e5; %Sampling Rate (Based on radio params below)
+Fs = 60e6/60;
+
+tx = comm.SDRuTransmitter('Platform','B210', ...
+    'SerialNum','316407B', ...
+    'CenterFrequency',Fc, ...
+    'Gain',Gain, ...
+    'PPSSource','External', ...
+    'ClockSource','External', ...
+    'MasterClockRate',60e6,...
+    'InterpolationFactor',60);
+tx.EnableBurstMode = false;
+% tx.NumFramesInBurst = 1;
+
+sinGen = dsp.SineWave("Frequency",100e3,...
+    'SampleRate',Fs,...
+    'SamplesPerFrame',SamplesPerFrame,...
+    'ComplexOutput',true);
+data = sinGen();
+
+%% TX
+i = 0
+% See MATLAB manual and readme
+while 1 %Continuously transmit
+    underruncount = 0;
+    tx(data);
+    i = i +1
+end

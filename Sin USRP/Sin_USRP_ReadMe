@@ -1,0 +1,41 @@
+Basic USRP Rx / Tx Test - Hunter G. Cook September 2022 - huntergcook@gatech.edu
+
+USRP_RX:
+	-try release for running multiple times.(Release object before next run)
+	-Basic Comm paramameters set as beginning(Fc,Gain,SamplesPerFrame,TimePerFrame)
+		Mostly adhoc for demonstration purposes, feel free to explore these values.
+		call_uhd_app('benchmark_rate','--tx_rate 20e6','-echo'); in MATLAB
+		adjusted the TX rate until there were no overflows and used that value for Fs
+	-comm.SDRuReceiver sets up system RX object. (See USRP manual for MATLAB)
+		Radio0 a.k.a 316405A will be the recieving radio.
+		It will receive on the RX2 port of RF0
+		I have a 10mhz referenece clock and PPS source connected to the radio.
+	-Reception (See USRP manual for MATLAB)
+		General gist is to keep trying to recieve until the radio give us a vector
+		set length to zero before doing this so we know that we got good data
+	-FFT for analyses
+		100Khz spike right where we expect.
+
+
+
+USRP_TX:
+	-Matching parameters to RX
+		Gain is important, Wired medium means easy to clip.
+		Side/unexpected lobes on FFT probably mean clipping.
+	-comm.SDRuTransmitter sets up system TX object (See USRP manual for MATLAB)
+		Radio1 a.k.a 316407B will be the transmitting radio.
+		It will transmit from the TX1/RX1 port of RF0
+		I have a 10mhz referenece clock and PPS source connected to the radio.
+	-SinGen: 100khz sin wave with Fs and Frame length accounted for
+	-Continually transmit the same data
+		More complex transmissions will not be this simple (i.e. Modulated Data)
+		i keeps track and makes sure things are working
+
+NOTES:
+Both radios taking 10MHZ reference signal and Pulse Per Second from external clock generator. Radios connected via wired medium. Radios connected to PC via USB3.0 cables in seperate ports.
+
+Scripts NEED to be ran in different MATLAB terminals to execute in paralell.
+
+Matlab Version R2022A
+	All toolboxs from installer
+	Communications Support Package for MATLAB (found in Add-ons)

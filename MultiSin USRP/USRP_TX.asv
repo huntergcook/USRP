@@ -1,0 +1,48 @@
+try release(tx); end
+clc; clear;
+
+Fc = 915e6; %Center Frequnecy
+Gain = 30; %Transmit Gain
+sa
+SamplesPerFrame = 100*200; %Sampling Rate (Based on radio params below)
+Fs = 60e6/10;
+
+tx = comm.SDRuTransmitter('Platform','B210', ...
+    'SerialNum','316407B', ...
+    'CenterFrequency',Fc, ...
+    'Gain',Gain, ...
+    'PPSSource','External', ...
+    'ClockSource','External', ...
+    'MasterClockRate',60e6,...
+    'InterpolationFactor',10);
+tx.EnableBurstMode = false;
+% tx.NumFramesInBurst = 1;
+
+sinGen1 = dsp.SineWave("Frequency",1000e3,...
+        'SampleRate',Fs,...
+        'SamplesPerFrame',SamplesPerFrame,...
+        'ComplexOutput',true);
+
+sinGen2 = dsp.SineWave("Frequency",2000e3,...
+        'SampleRate',Fs,...
+        'SamplesPerFrame',SamplesPerFrame,...
+        'ComplexOutput',true);
+carrier1 = sinGen1();
+carrier2 = sinGen2();
+
+load('refs.mat','seq1');
+load('refs.mat','seq2');
+mod = comm.BPSKModulator();
+modData1 = my_upsample(mod((seq1),100);
+modData2 = my_upsample(mod((seq2),100);
+
+signalOut = (carrier1.*modData1 + carrier2.*modData2) / 2;
+
+%% TX
+i = 0
+% See MATLAB manual and readme
+while 1 %Continuously transmit
+    underruncount = 0;
+    tx(signalOut);
+    i = i +1
+end

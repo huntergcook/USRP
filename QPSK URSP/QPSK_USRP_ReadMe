@@ -1,0 +1,72 @@
+Basic USRP Rx / Tx Test - Hunter G. Cook September 2022 - huntergcook@gatech.edu
+
+Transmit / Receive QPSK Modulated Data:
+	Transmit: Random data, modulated as QPSK.
+		Symbols = 0,1,2,3. See a QPSK Constellation diagram, or the MATLAB help.
+		Gives us baseband data points that need send to the radio.
+		We should see 4 distinct points,  using DScatter you can plot the inphase
+			and quadrature points to see them from the transmitter.
+		Upsample: For simplicity, I am repeating each symbol 10 times just to
+			demonstrate the phase effects of transmitting. We do not care
+			about the data at this point.
+	Receive: Downsample and plot.
+		Downsample: Skipping this step for now, leaving the repeated 10 symbols and plotting.
+		Plotting: The DScatter function will plot a heat map of IQ samples. We would expect
+			the four IQ poits (plus noise) that we sent to the radio.
+			Since both the transmitter and reciever are at the same frequency, the output
+			should be some phase shifted version of these samples.
+		IQ Plot rotation: If you run the script, you should see the points move arround and some
+		other points not close. There are two sources of phase shift here. One is the physical
+		phase delay from going from transmitter to reciever. (Think phasors) The other source
+		is that the transmitter is going to put the generated samples on the carrier at some
+		random point.
+		Normalize: Make all amplitudes be max 1. Since we are doing QPSK, there is no amplitude
+			information. More complicated schemes will require "equalization" to determine
+			the recieved amplitude compared to others. This can be done with a set of symbols
+			in the beginning that the radio is expected (Pilot symbols / Preamble) so it knows
+			the amplitude of future symbols that look the same. Read about covariance to think
+			about this.
+
+Take Aways:
+	Phase: Why does the phase behave as it does? Unplug the external clock and see what happens
+		It is synchronized for the most part, but changes some. Try to play with parameters
+		and see what changes.
+	Modulation: What data did we give the radio? What does a symbol do to the carrier (Phase and
+		amplitude) and how does the reciever get that data out?
+		
+
+USRP_RX:
+	-try release for running multiple times.(Release object before next run)
+	-Basic Comm paramameters set as beginning(Fc,Gain,SamplesPerFrame,TimePerFrame)
+		Mostly adhoc for demonstration purposes, feel free to explore these values.
+		call_uhd_app('benchmark_rate','--tx_rate 20e6','-echo'); in MATLAB
+		adjusted the TX rate until there were no overflows and used that value for Fs
+	-comm.SDRuReceiver sets up system RX object. (See USRP manual for MATLAB)
+		Radio0 a.k.a 316405A will be the recieving radio.
+		It will receive on the RX2 port of RF0
+		I have a 10mhz referenece clock and PPS source connected to the radio.
+	-Reception (See USRP manual for MATLAB)
+		General gist is to keep trying to recieve until the radio give us a vector
+		set length to zero before doing this so we know that we got good data
+
+
+USRP_TX:
+	-Matching parameters to RX
+		Gain is important, Wired medium means easy to clip.
+		Side/unexpected lobes on FFT probably mean clipping.
+	-comm.SDRuTransmitter sets up system TX object (See USRP manual for MATLAB)
+		Radio1 a.k.a 316407B will be the transmitting radio.
+		It will transmit from the TX1/RX1 port of RF0
+		I have a 10mhz referenece clock and PPS source connected to the radio.
+	-Continually transmit the same data
+		More complex transmissions will not be this simple (i.e. Modulated Data)
+		i keeps track and makes sure things are working
+
+NOTES:
+Both radios taking 10MHZ reference signal and Pulse Per Second from external clock generator. Radios connected via wired medium. Radios connected to PC via USB3.0 cables in seperate ports.
+
+Scripts NEED to be ran in different MATLAB terminals to execute in paralell.
+
+Matlab Version R2022A
+	All toolboxs from installer
+	Communications Support Package for MATLAB (found in Add-ons)

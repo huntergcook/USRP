@@ -1,0 +1,34 @@
+try release(rx); end
+clc; clear;
+
+Fc = 915e6;
+Gain = 0;
+Fs = 60e6/6;
+SamplesPerFrame = 1e5;
+TimePerFrame = SamplesPerFrame / Fs;
+
+rx = comm.SDRuReceiver('Platform','B210', ...
+    'SerialNum','316405A', ...
+    'CenterFrequency',Fc, ...
+    'Gain',Gain, ...
+    'PPSSource','External', ...
+    'ClockSource','External', ...
+    'SamplesPerFrame',SamplesPerFrame,...
+    'MasterClockRate',60e6,...
+    'DecimationFactor',60);
+rx.EnableBurstMode = false;
+% rx.NumFramesInBurst = 10;
+%%
+len = 0;
+while len<=0
+    [data,len] = rx();
+end
+
+% figure(1)
+% plot(real(data))
+% figure(2)
+% plot(imag(data))
+figure(3)
+spectrum = fft(data);
+f = (0:SamplesPerFrame-1)*(Fs/SamplesPerFrame);
+power = abs(spec)
